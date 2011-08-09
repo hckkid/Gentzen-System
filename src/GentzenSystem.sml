@@ -8,6 +8,7 @@ signature GENTZENSYSTEM = sig
 	val isContradiction : Form.form -> bool
 	val isSatisfiable : Form.form -> bool
 	val testAllNode : sequentTree -> bool
+	val printSequentTree : sequentTree -> unit
 end
 structure GentzenSystem :> GENTZENSYSTEM = struct
 	datatype sequent = seq of Form.form Set.myset * Form.form Set.myset
@@ -86,4 +87,19 @@ structure GentzenSystem :> GENTZENSYSTEM = struct
 	fun isValid(f) = not(testAllNode(generateSequentTree(f)))
 	fun isContradiction(f) = isValid(Form.Negation(f))
 	fun isSatisfiable(f) = if (not (isContradiction(f))) then true else false
+	fun printSequentTree(st) = 
+		let
+			fun printSeq(seq(x,y)) = 
+				let
+					fun tmpPrint([]) = ""
+						| tmpPrint([x]) = Form.format(x)
+						| tmpPrint(x::xs) = String.concat(Form.format(x)::","::tmpPrint(xs)::[])
+				in String.concat("< "::tmpPrint(x)::" >"::" , "::"< "::tmpPrint(y)::" >"::[])
+				end
+			fun printer(seqtree(x),y) = (print(y);print(printSeq(x));print("\n"))
+				| printer(seqtree1(x,y),z) = (print(z);print(printSeq(x));print("\n");printer(y,String.concat(z::"\t"::[])))
+				| printer(seqtree2(x,y,z),t) = (print(t);print(printSeq(x));print("\n");printer(y,String.concat(t::"\t"::[]));printer(z,String.concat(t::"\t"::[])))
+		in
+			printer(st,"")
+		end;
 end
